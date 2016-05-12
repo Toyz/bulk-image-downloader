@@ -93,6 +93,10 @@ func main() {
 }
 
 func GetAllWallpapers(contents string) {
+	if contents == "" {
+		return
+	}
+
 	var dat WallPaperJSON
 	if err := json.Unmarshal([]byte(contents), &dat); err != nil {
 		panic(err)
@@ -174,7 +178,7 @@ func downloadFile(filepath string, url string) (err error) {
 func ReadJSONFromAPI(page int) string {
 	if page_limit > -1 {
 		if page > page_limit {
-			return
+			return ""
 		}
 	}
 
