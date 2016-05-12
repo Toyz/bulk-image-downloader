@@ -110,7 +110,11 @@ func GetAllWallpapers(contents string) {
 		var wp = dat.Wallpapers[i]
 		var ur = wp.URLImage
 
-		if wp.Height < minHeight || wp.Width < minWidth {
+		var h, _ = strconv.Atoi(wp.Height)
+
+		var w, _ = strconv.Atoi(wp.Width)
+
+		if h < minHeight || w < minWidth {
 			continue
 		}
 
