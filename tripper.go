@@ -134,18 +134,16 @@ func GetAllWallpapers(contents string) {
 		})
 	}
 
-	if page_limit > -1 {
-		if current_page > page_limit {
-			return
-		}
+	if current_page == page_limit {
+		return
 	}
 
 	if len(dat.Wallpapers) < 30 {
 		return
 	}
 
-	time.Sleep(time.Duration(2) * time.Second)
 	current_page = current_page + 1
+	time.Sleep(time.Duration(2) * time.Second)
 	GetAllWallpapers(ReadJSONFromAPI(current_page))
 }
 
@@ -174,6 +172,12 @@ func downloadFile(filepath string, url string) (err error) {
 }
 
 func ReadJSONFromAPI(page int) string {
+	if page_limit > -1 {
+		if page > page_limit {
+			return
+		}
+	}
+
 	var p = strconv.Itoa(page)
 	var url = "https://wall.alphacoders.com/api2.0/get.php?auth=" + auth + "&method=search&term=" + search + "&page=" + p
 	response, err := http.Get(url)
