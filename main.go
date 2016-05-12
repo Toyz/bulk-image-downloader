@@ -23,6 +23,9 @@ var hxwstore bool
 var current_page = 1
 var current_download = 1
 var page_limit = -1
+var minWidth = -1
+var minHeight = -1
+
 var base_folder string = "./Output"
 var thread_pool *threads.ThreadPool
 
@@ -47,6 +50,8 @@ func main() {
 	flag.StringVar(&base_folder, "output", "./Output", "Output folder for images")
 	flag.IntVar(&page_limit, "pl", -1, "Max pages to download from")
 	flag.BoolVar(&hxwstore, "save-by-size", true, "Store images in different folders by width and height")
+	flag.IntVar(&minHeight, "min-height", -1, "Min height of the image to download")
+	flag.IntVar(&minWidth, "min-width", -1, "Min width of the image to download")
 	flag.IntVar(&tCount, "threads", runtime.NumCPU(), "Number of threads to download on concurrently")
 
 	flag.Parse()
@@ -102,7 +107,12 @@ func GetAllWallpapers(contents string) {
 			folder = base_folder + "/" + search + "/" + dat.Wallpapers[i].Width + "x" + dat.Wallpapers[i].Height
 		}
 
-		var ur = dat.Wallpapers[i].URLImage
+		var wp = dat.Wallpapers[i]
+		var ur = wp.URLImage
+
+		if wp.Height < minHeight || wp.Width < minWidth {
+			continue
+		}
 
 		os.MkdirAll(folder, 0777)
 
