@@ -189,13 +189,14 @@ func ReadJSONFromAPI(page int) string {
 	if err != nil {
 		fmt.Printf("%s", err)
 		return ReadJSONFromAPI(page)
-	} else {
-		defer response.Body.Close()
-		contents, err := ioutil.ReadAll(response.Body)
-		if err != nil {
-			fmt.Printf("%s", err)
-			return ReadJSONFromAPI(page)
-		}
-		return string(contents)
 	}
+
+	defer response.Body.Close()
+	contents, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		fmt.Printf("%s", err)
+		return ReadJSONFromAPI(page)
+	}
+	return string(contents)
+
 }
