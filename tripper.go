@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/wushilin/threads"
@@ -25,6 +26,8 @@ var current_download = 1
 var page_limit = -1
 var minWidth = -1
 var minHeight = -1
+var method string
+var base_url = "https://wall.alphacoders.com/api2.0/get.php?"
 
 var base_folder string = "./Output"
 var thread_pool *threads.ThreadPool
@@ -42,6 +45,7 @@ type WallPaperJSON struct {
 		URLPage  string `json:"url_page"`
 	} `json:"wallpapers"`
 	TotalMatch string `json:"total_match"`
+	IsLast     bool   `json:"is_last"`
 }
 
 func main() {
@@ -53,6 +57,7 @@ func main() {
 	flag.IntVar(&minHeight, "min-height", -1, "Min height of the image to download")
 	flag.IntVar(&minWidth, "min-width", -1, "Min width of the image to download")
 	flag.IntVar(&tCount, "threads", runtime.NumCPU(), "Number of threads to download on concurrently")
+	flag.StringVar(&method, "mode", "search", "Current API Mode (search, sub_category, category)")
 
 	flag.Parse()
 
@@ -78,6 +83,7 @@ func main() {
 		return
 	}
 
+	base_url = base_url + "auth=" + auth + "&"
 	thread_pool = threads.NewPool(tCount, 1000000)
 
 	os.MkdirAll(base_folder+"/"+search, 0777)
@@ -129,7 +135,7 @@ func GetAllWallpapers(contents string) {
 		}
 
 		current_download++
-		fmt.Printf("Downloading Wallpaper: %s (%v/%s)\n", ur, current_download, dat.TotalMatch)
+		fmt.Printf("Downloading Wallpaper: %s\n", ur)
 		thread_pool.Submit(func() interface{} {
 			downloadFile(folder+"/"+filepath.Base(ur), ur)
 
@@ -142,7 +148,7 @@ func GetAllWallpapers(contents string) {
 		return
 	}
 
-	if len(dat.Wallpapers) < 30 {
+	if dat.IsLast || len(dat.Wallpapers) < 30 {
 		return
 	}
 
@@ -176,6 +182,7 @@ func downloadFile(filepath string, url string) (err error) {
 }
 
 func ReadJSONFromAPI(page int) string {
+	//read from the Json API url
 	if page_limit > -1 {
 		if page > page_limit {
 			return ""
@@ -183,7 +190,16 @@ func ReadJSONFromAPI(page int) string {
 	}
 
 	var p = strconv.Itoa(page)
-	var url = "https://wall.alphacoders.com/api2.0/get.php?auth=" + auth + "&method=search&term=" + search + "&page=" + p
+	var url = base_url + "method=search&term=" + search + "&page=" + p
+
+	var m = strings.ToLower(method)
+	if m == "sub_category" {
+		url = base_url + "method=sub_category&id=" + search + "&page=" + p
+
+	} else if m == "category" {
+		url = base_url + "method=category&id=" + search + "&page=" + p
+	}
+
 	response, err := http.Get(url)
 
 	if err != nil {
@@ -197,6 +213,8 @@ func ReadJSONFromAPI(page int) string {
 		fmt.Printf("%s", err)
 		return ReadJSONFromAPI(page)
 	}
-	return string(contents)
+	var data = string(contents)
+	//ioutil.WriteFile("output.json", []byte(data), 0777)
+	return data
 
 }
