@@ -12,7 +12,6 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/wushilin/threads"
 )
@@ -145,7 +144,7 @@ func GetAllWallpapers(contents string) {
 	}
 
 	current_page = current_page + 1
-	time.Sleep(time.Duration(2) * time.Second)
+	//time.Sleep(time.Duration(1) * time.Second)
 	GetAllWallpapers(ReadJSONFromAPI(current_page))
 }
 
