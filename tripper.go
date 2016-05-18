@@ -83,11 +83,6 @@ func main() {
 		return
 	}
 
-	if (minHeight > -1 && minWidth == -1) || (minHeight == -1 && minWidth > -1) {
-		fmt.Print("Width and height must both be set at the same time")
-		return
-	}
-
 	base_url = base_url + "auth=" + auth + "&"
 	thread_pool = threads.NewPool(tCount, 1000000)
 
