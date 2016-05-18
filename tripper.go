@@ -83,6 +83,11 @@ func main() {
 		return
 	}
 
+	if (minHeight > -1 && minWidth == -1) || (minHeight == -1 && minWidth > -1) {
+		fmt.Print("Width and height must both be set at the same time")
+		return
+	}
+
 	base_url = base_url + "auth=" + auth + "&"
 	thread_pool = threads.NewPool(tCount, 1000000)
 
@@ -119,14 +124,6 @@ func GetAllWallpapers(contents string) {
 
 		var wp = dat.Wallpapers[i]
 		var ur = wp.URLImage
-
-		var h, _ = strconv.Atoi(wp.Height)
-
-		var w, _ = strconv.Atoi(wp.Width)
-
-		if h < minHeight || w < minWidth {
-			continue
-		}
 
 		os.MkdirAll(folder, 0777)
 
@@ -200,6 +197,14 @@ func ReadJSONFromAPI(page int) string {
 		url = base_url + "method=category&id=" + search + "&page=" + p
 	}
 
+	if minHeight > -1 && minWidth > -1 {
+		var mh = strconv.Itoa(minHeight)
+		var mw = strconv.Itoa(minWidth)
+
+		url = url + "&width=" + mw + "&height=" + mh + "&operator=min"
+	}
+
+	fmt.Printf("URL: %s\n", url)
 	response, err := http.Get(url)
 
 	if err != nil {
